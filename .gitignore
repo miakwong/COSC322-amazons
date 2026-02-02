@@ -1,0 +1,12 @@
+# Maven build output
+target/
+
+# OS junk
+.DS_Store
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
