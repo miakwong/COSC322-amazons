@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run HumanPlayer p1",
+      "type": "shell",
+      "command": "mvn",
+      "args": [
+        "-q",
+        "exec:java",
+        "-Dexec.mainClass=ygraph.ai.smartfox.games.amazons.HumanPlayer"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run HumanPlayer p2",
+      "type": "shell",
+      "command": "mvn",
+      "args": [
+        "-q",
+        "exec:java",
+        "-Dexec.mainClass=ygraph.ai.smartfox.games.amazons.HumanPlayer"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run COSC322Test spectator",
+      "type": "shell",
+      "command": "mvn",
+      "args": [
+        "-q",
+        "exec:java",
+        "-Dexec.mainClass=ubc.cosc322.COSC322Test",
+        "-Dexec.args=spec 123"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

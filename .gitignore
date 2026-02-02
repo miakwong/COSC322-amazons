@@ -8,7 +8,6 @@ target/
 *.log
 
 # IDE files
-.vscode/
 .idea/
 .classpath
 .project
