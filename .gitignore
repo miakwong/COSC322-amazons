@@ -10,3 +10,6 @@ target/
 # IDE files
 .vscode/
 .idea/
+.classpath
+.project
+.settings/
