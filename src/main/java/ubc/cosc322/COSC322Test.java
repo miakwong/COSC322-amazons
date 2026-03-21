@@ -171,7 +171,7 @@ public class COSC322Test extends GamePlayer{
                 else depth = 4;
 
                 ai.setDepth(depth);
-                chosen = ai.findBestMove(board);
+                chosen = ai.findBestMove(board, 1500); // 1.5 seconds
 
                 System.out.println(
                     "AI plays: (" +

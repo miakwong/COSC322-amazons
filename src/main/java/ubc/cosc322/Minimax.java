@@ -7,6 +7,7 @@ public class Minimax {
     private final int myId;
     private final int opponentId;
     private int maxDepth;
+    private Map<Long, Double> tt = new HashMap<>();
 
     public Minimax(int myId, int opponentId, int maxDepth) {
         this.myId = myId;
@@ -14,6 +15,23 @@ public class Minimax {
         this.maxDepth = maxDepth;
     }
 
+    public Move findBestMoveIterative(Board board, long timeLimitMs) {
+        long endTime = System.currentTimeMillis() + timeLimitMs;
+        Move bestMove = null;
+
+        for (int depth = 1; depth <= 10; depth++) {
+            if (System.currentTimeMillis() >= endTime) break;
+
+            this.maxDepth = depth;
+            Move move = findBestMove(board);
+
+            if (move != null) {
+                bestMove = move;
+            }
+        }
+
+        return bestMove;
+    }
     public Move findBestMove(Board board) {
 
         double alpha = Double.NEGATIVE_INFINITY;
@@ -47,17 +65,28 @@ public class Minimax {
                            double alpha, double beta,
                            boolean maximizing) {
 
+
+        long hash = board.computeHash();
+
+        if (tt.containsKey(hash)) {
+            return tt.get(hash);
+        }
+
         if (depth == 0) {
         	// modify the function evaluate to fine tune the heuristics
         	// for minimax.
-            return evaluate(board);
+            double val = evaluate(board);
+            tt.put(hash, val);   // store before returning
+            return val;
         }
 
         int player = maximizing ? myId : opponentId;
         List<Move> moves = board.generateAllMoves(player);
 
         if (moves.isEmpty()) {
-            return maximizing ? -999999 : 999999;
+            double val = maximizing ? -999999 : 999999;
+            tt.put(hash, val);   // store before returning
+            return val;
         }
 
         orderMoves(board, moves, player);
@@ -78,6 +107,7 @@ public class Minimax {
                 if (beta <= alpha) break;
             }
 
+            tt.put(hash, best);
             return best;
 
         } else {
@@ -95,9 +125,44 @@ public class Minimax {
 
                 if (beta <= alpha) break;
             }
-
+            tt.put(hash, best);
             return best;
         }
+    }
+
+    private int territory(Board board) {
+        int score = 0;
+
+        for (int r = 0; r < Board.SIZE; r++) {
+            for (int c = 0; c < Board.SIZE; c++) {
+
+                if (board.get(r, c) != 0) continue;
+
+                int myDist  = closestQueenDist(board, r, c, myId);
+                int oppDist = closestQueenDist(board, r, c, opponentId);
+
+                if (myDist < oppDist) score++;
+                else if (oppDist < myDist) score--;
+            }
+        }
+
+        return score;
+    }
+    
+    private int closestQueenDist(Board board, int r, int c, int playerId) {
+
+        List<int[]> queens = (playerId == 1)
+                ? board.getWhiteQueens()
+                : board.getBlackQueens();
+
+        int min = Integer.MAX_VALUE;
+
+        for (int[] q : queens) {
+            int dist = Math.max(Math.abs(q[0] - r), Math.abs(q[1] - c));
+            min = Math.min(min, dist);
+        }
+
+        return min;
     }
 
     // Evaluate the terminating node
@@ -106,9 +171,13 @@ public class Minimax {
         int myMob  = board.mobility(myId);
         int oppMob = board.mobility(opponentId);
         double score = myMob - oppMob;
-        
+
+        // existing heuristic
         score += constrainedQueenBonus(board);
-        
+
+        // territory
+        score += 0.7 * territory(board);
+
         return score;
     }
 
@@ -159,7 +228,7 @@ public class Minimax {
     		// 1. Constrained queen heuristic
             int mobility = queenConstraint(board, m, playerId); 
     		m.score =  1.0 * mobility;  // give it some weight trial and error
-    		
+    		m.score += Math.random() * 0.1; // prevents predictable play
     		// 2. Arrow heuristic: punish opponent's weakest queen (dominant)
             double arrowScore = arrowImpact(board, m, playerId);
             m.score += arrowScore * 1.5;  // give it some weight trial and error
@@ -167,6 +236,11 @@ public class Minimax {
     	
     	
     	moves.sort((a, b) -> Double.compare(b.score, a.score));
+
+        // Keep only best moves (reduces branching)
+        if (moves.size() > 40) {
+            moves.subList(40, moves.size()).clear();
+        }
     }
     
     // -------------------------

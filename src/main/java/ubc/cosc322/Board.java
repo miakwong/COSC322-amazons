@@ -64,6 +64,19 @@ public class Board {
         rebuildQueenLists();
     }
 
+
+    public long computeHash() {
+        long hash = 0;
+
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                hash = hash * 31 + grid[r][c];
+            }
+        }
+
+        return hash;
+    }
+
     // copy constructor to create a new board from the existing
     // board
     public Board(Board other) {
