@@ -52,12 +52,12 @@ public class Minimax {
 
             int dist = Math.max(Math.abs(q[0] - newR), Math.abs(q[1] - newC));
 
-            // 🔻 penalties (too close)
+            // penalties (too close)
             if (dist <= 1) score -= 15;
             else if (dist == 2) score -= 8;
             else if (dist == 3) score -= 3;
 
-            // 🔺 reward (far apart)
+            // reward (far apart)
             else if (dist >= 5) score += 2;
         }
 
@@ -267,7 +267,7 @@ public class Minimax {
             double arrowScore = arrowImpact(board, m, playerId);
             m.score += arrowScore * 1.5;
 
-            // 🔥 3. NEW: spacing penalty
+            // 3. Spacing penalts
             m.score += queenSpacingPenalty(board, m, playerId);
 
             // (optional) small randomness
