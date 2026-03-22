@@ -1,6 +1,9 @@
 package ubc.cosc322;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Minimax {
 
@@ -33,7 +36,38 @@ public class Minimax {
         return bestMove;
     }
 
+    private double nextMovesBestMoves (Board board, Move m, int playerId, int callAmount){
+        if(callAmount > 0){
+            return findBestMoveInTheFuture(board, callAmount, m).score;
+        }
+        return 0;
+    }
+    private List<Move> getAllPossibleMovesFromCoridants(int r, int c, Board board){
+        List<Move> allPossibleMoves = new ArrayList<>();
+        // Taken from Board.java (NOT MY CODE GOAs CODE)
+        List<int[]> queenMoves = board.getLegalQueenMoves(r, c);
 
+            // now we need to create all the possible moves of the arrow
+            // for a queen.
+        for (int[] dest : queenMoves) {
+                int dr = dest[0];
+                int dc = dest[1];
+                // Arrow moves share the same rule as queen moves
+                List<int[]> arrows = board.getLegalQueenMoves(dr, dc);
+                // now we have all moves for one queen with all
+                // possible arrow moves.  This is large.  We save
+                // all possible moves (states) into a list
+            for (int[] arr : arrows) {
+                allPossibleMoves.add(new Move(
+                    r, c,
+                    dr, dc,
+                    arr[0], arr[1]
+                ));
+            }
+        }
+    return allPossibleMoves;
+
+    }
     private double queenSpacingPenalty(Board board, Move m, int playerId) {
 
         List<int[]> myQueens = (playerId == 1)
@@ -56,6 +90,7 @@ public class Minimax {
             if (dist <= 1) score -= 15;
             else if (dist == 2) score -= 8;
             else if (dist == 3) score -= 3;
+
 
             // reward (far apart)
             else if (dist >= 5) score += 2;
@@ -83,7 +118,7 @@ public class Minimax {
             board.undoMove(m, myId, rec);
 
             if (value > bestValue) {
-                bestValue = value;ci
+                bestValue = value;
                 bestMove = m;
             }
 
@@ -92,7 +127,35 @@ public class Minimax {
 
         return bestMove;
     }
+        public Move findBestMoveInTheFuture(Board board, int iterative, Move moveToCheck ) {
 
+        double alpha = Double.NEGATIVE_INFINITY;
+        double beta  = Double.POSITIVE_INFINITY;
+
+        double bestValue = Double.NEGATIVE_INFINITY;
+        Move bestMove = null;
+
+        List<Move> moves = getAllPossibleMovesFromCoridants(moveToCheck.qToRow, moveToCheck.qToCol, board);
+        
+        orderMoves(board, moves, myId, iterative);  // your existing heuristics
+
+        for (Move m : moves) {
+            Board.MoveRecord rec = board.applyMove(m, myId);
+
+            double value = minimax(board, maxDepth - 1, alpha, beta, false);
+
+            board.undoMove(m, myId, rec);
+
+            if (value > bestValue) {
+                bestValue = value;
+                bestMove = m;
+            }
+
+            alpha = Math.max(alpha, bestValue);
+        }
+
+        return bestMove;
+    }
     private double minimax(Board board, int depth,
                            double alpha, double beta,
                            boolean maximizing) {
@@ -260,9 +323,39 @@ public class Minimax {
     		// 1. Constrained queen heuristic
             int mobility = queenConstraint(board, m, playerId); 
     		// 1. mobility improvement
-            int mobility = queenConstraint(board, m, playerId); 
             m.score = 1.0 * mobility;
 
+            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, 3);
+            m.score += potientalMovesScore;
+            // 2. arrow impact
+            double arrowScore = arrowImpact(board, m, playerId);
+            m.score += arrowScore * 1.5;
+
+            // 3. Spacing penalts
+            m.score += queenSpacingPenalty(board, m, playerId);
+
+            // (optional) small randomness
+            m.score += Math.random() * 0.1;
+    	} 
+    	
+    	
+    	moves.sort((a, b) -> Double.compare(b.score, a.score));
+
+        // Keep only best moves (reduces branching)
+        if (moves.size() > 40) {
+            moves.subList(40, moves.size()).clear();
+        }
+    }
+
+     private void orderMoves(Board board, List<Move> moves, int playerId, int iterative) {
+    	for (Move m : moves) {
+    		// 1. Constrained queen heuristic
+            int mobility = queenConstraint(board, m, playerId); 
+    		// 1. mobility improvement
+            m.score = 1.0 * mobility;
+
+            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, iterative-1);
+            m.score += potientalMovesScore;
             // 2. arrow impact
             double arrowScore = arrowImpact(board, m, playerId);
             m.score += arrowScore * 1.5;
