@@ -32,6 +32,38 @@ public class Minimax {
 
         return bestMove;
     }
+
+
+    private double queenSpacingPenalty(Board board, Move m, int playerId) {
+
+        List<int[]> myQueens = (playerId == 1)
+                ? board.getWhiteQueens()
+                : board.getBlackQueens();
+
+        int newR = m.qToRow;
+        int newC = m.qToCol;
+
+        double score = 0;
+
+        for (int[] q : myQueens) {
+
+            // skip the queen we are moving
+            if (q[0] == m.qFromRow && q[1] == m.qFromCol) continue;
+
+            int dist = Math.max(Math.abs(q[0] - newR), Math.abs(q[1] - newC));
+
+            // 🔻 penalties (too close)
+            if (dist <= 1) score -= 15;
+            else if (dist == 2) score -= 8;
+            else if (dist == 3) score -= 3;
+
+            // 🔺 reward (far apart)
+            else if (dist >= 5) score += 2;
+        }
+
+        return score;
+    }
+
     public Move findBestMove(Board board) {
 
         double alpha = Double.NEGATIVE_INFINITY;
@@ -51,7 +83,7 @@ public class Minimax {
             board.undoMove(m, myId, rec);
 
             if (value > bestValue) {
-                bestValue = value;
+                bestValue = value;ci
                 bestMove = m;
             }
 
@@ -227,11 +259,19 @@ public class Minimax {
     	for (Move m : moves) {
     		// 1. Constrained queen heuristic
             int mobility = queenConstraint(board, m, playerId); 
-    		m.score =  1.0 * mobility;  // give it some weight trial and error
-    		m.score += Math.random() * 0.1; // prevents predictable play
-    		// 2. Arrow heuristic: punish opponent's weakest queen (dominant)
+    		// 1. mobility improvement
+            int mobility = queenConstraint(board, m, playerId); 
+            m.score = 1.0 * mobility;
+
+            // 2. arrow impact
             double arrowScore = arrowImpact(board, m, playerId);
-            m.score += arrowScore * 1.5;  // give it some weight trial and error
+            m.score += arrowScore * 1.5;
+
+            // 🔥 3. NEW: spacing penalty
+            m.score += queenSpacingPenalty(board, m, playerId);
+
+            // (optional) small randomness
+            m.score += Math.random() * 0.1;
     	} 
     	
     	
