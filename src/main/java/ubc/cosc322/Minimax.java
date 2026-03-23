@@ -314,9 +314,9 @@ public class Minimax {
             } else {
                 // Contested territory 
                 totalScore = (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
-                if(totalScore != 0){
-                    System.out.println(totalScore);
-                }
+                //if(totalScore != 0){ // just to see if i need to adjust scoring
+                //    System.out.println(totalScore);
+                //}
             }
         }
         board.undoMove(m, myId, rec);
