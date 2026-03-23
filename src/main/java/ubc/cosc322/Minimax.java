@@ -1,10 +1,13 @@
 package ubc.cosc322;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class Minimax {
@@ -290,7 +293,7 @@ public class Minimax {
             moves.subList(40, moves.size()).clear();
         }
     }
-    public double evaluateWallingMove(Board board, Move m, int playerID) {
+    private double evaluateWallingMove(Board board, Move m, int playerId) {
         Board.MoveRecord rec = board.applyMove(m, myId);
         
         // This just looks over the entire board saying what arrows are connected 
@@ -300,7 +303,7 @@ public class Minimax {
         
         // Go through all the territories see how they are looking
         for (Set<Integer> territory : territories) {
-            int myQueens = countQueensInTerritory(board, territory, playerID);
+            int myQueens = countQueensInTerritory(board, territory, playerId);
             int oppQueens = countQueensInTerritory(board, territory, opponentId);
             int roomSize = territory.size(); // HOW MANY OF BLOCKS IN THIS TERRITORY
 
@@ -313,7 +316,7 @@ public class Minimax {
                 totalScore += roomSize * 1.5;
             } else {
                 // Contested territory 
-                totalScore += (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
+                //totalScore += (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
                 //if(totalScore != 0){ // just to see if i need to adjust scoring
                 //    System.out.println(totalScore);
                 //}
@@ -322,13 +325,72 @@ public class Minimax {
                 //if (myMovesToGetToSquare<OppentMovesToGetToSquare): this is my square
                 //elif(myMovesToGetToSquare>OppentMovesToGetToSquare): Its their square
                 //elif(myMovesToGetToSquare==OppentMovesToGetToSquare): Its in contest
+                // https://www.geeksforgeeks.org/dsa/when-to-use-dfs-or-bfs-to-solve-a-graph-problem/
+                //THIS TO-DO IS DONE BUT I LEFT IT HERE TO EXPLAIN WHATS GOING ON
+                int[] myDists = queenDistance(board, territory, playerId);
+                int[] oppDists = queenDistance(board, territory, opponentId);
+                double territoryScore = 0;
+                for (int idx : territory) {
+                    if (myDists[idx] < oppDists[idx]) {
+                        // We reach this square sooner we own it.
+                        territoryScore += 1.0;
+                    } else if (oppDists[idx] < myDists[idx]) {
+                        // Opponent reaches it sooner opps own it.
+                        territoryScore -= 1.0;
+                    }
+                    // If distances are equal its a neutral square
+                }
+                totalScore += territoryScore;
             }
         }
         board.undoMove(m, myId, rec);
         
         return totalScore;
     }
-    public List<Set<Integer>> findConnectedBlocks(Board board) {
+    private int[] queenDistance(Board board,Set<Integer> territory, int playerId){
+
+        int[] distances = new int[100];
+        Arrays.fill(distances, Integer.MAX_VALUE);
+        //bfs algorithm thanks geeks for geeks :) https://www.geeksforgeeks.org/dsa/breadth-first-search-or-bfs-for-a-graph/ 
+        Queue<Integer> queue = new LinkedList<>();
+        List<int[]> queens = (playerId == 1) ? board.getWhiteQueens() : board.getBlackQueens();
+        for (int[] q : queens) {
+            int startIdx = q[0] * 10 + q[1];
+            distances[startIdx] = 0;
+            queue.add(startIdx);
+        }
+
+        while (!queue.isEmpty()) {
+            int currIdx = queue.poll();
+            int r = currIdx / 10;
+            int c = currIdx % 10;
+            int currentDist = distances[currIdx];
+
+            //Same things as the DFS look at all moves
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    if (dr == 0 && dc == 0) continue;
+                    for (int step = 1; step < 10; step++) {
+                        int nr = r + dr * step;
+                        int nc = c + dc * step;
+                        int nextIdx = nr * 10 + nc;
+                        if (nr < 0 || nr >= 10 || nc < 0 || nc >= 10 || board.get(nr, nc) != 0) {
+                            break; 
+                        }
+                        //If it aint in our territory we dont care
+                        if (!territory.contains(nextIdx)) continue;
+                        //Faster way to get there?
+                        if (distances[nextIdx] > currentDist + 1) {
+                            distances[nextIdx] = currentDist + 1;
+                            queue.add(nextIdx);
+                        }
+                    }
+                }
+            }
+        }
+        return distances;
+    }
+    private List<Set<Integer>> findConnectedBlocks(Board board) {
         List<Set<Integer>> territories = new ArrayList<>();
         boolean[] visited = new boolean[100]; // 100
         for (int r = 0; r < 10; r++) {
