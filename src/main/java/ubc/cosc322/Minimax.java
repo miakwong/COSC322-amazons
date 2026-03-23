@@ -37,8 +37,15 @@ public class Minimax {
     }
 
     private double nextMovesBestMoves (Board board, Move m, int playerId, int callAmount){
+         
         if(callAmount > 0){
-            return findBestMoveInTheFuture(board, callAmount, m).score;
+            Move bestMove = findBestMoveInTheFuture(board, callAmount-1, m);
+            if(bestMove == null){
+                System.out.println("returning null therefor 0 for next best move \n");
+                return 0;
+            }
+            System.out.println(String.format("Score for this bestMove is :%.2f", bestMove.score));
+            return bestMove.score;
         }
         return 0;
     }
@@ -113,7 +120,7 @@ public class Minimax {
         for (Move m : moves) {
             Board.MoveRecord rec = board.applyMove(m, myId);
 
-            double value = minimax(board, maxDepth - 1, alpha, beta, false);
+            double value = minimax(board, maxDepth - 1, alpha, beta, false, moves);
 
             board.undoMove(m, myId, rec);
 
@@ -134,15 +141,15 @@ public class Minimax {
 
         double bestValue = Double.NEGATIVE_INFINITY;
         Move bestMove = null;
-
+        Board.MoveRecord rec2 = board.applyMove(moveToCheck, myId);
         List<Move> moves = getAllPossibleMovesFromCoridants(moveToCheck.qToRow, moveToCheck.qToCol, board);
-        
+        board.undoMove(moveToCheck, myId, rec2);
         orderMoves(board, moves, myId, iterative);  // your existing heuristics
 
         for (Move m : moves) {
             Board.MoveRecord rec = board.applyMove(m, myId);
 
-            double value = minimax(board, maxDepth - 1, alpha, beta, false);
+            double value = minimax(board, maxDepth - 1, alpha, beta, false, moves);
 
             board.undoMove(m, myId, rec);
 
@@ -153,12 +160,11 @@ public class Minimax {
 
             alpha = Math.max(alpha, bestValue);
         }
-
         return bestMove;
     }
     private double minimax(Board board, int depth,
                            double alpha, double beta,
-                           boolean maximizing) {
+                           boolean maximizing, List<Move> moves) {
 
 
         long hash = board.computeHash();
@@ -176,7 +182,6 @@ public class Minimax {
         }
 
         int player = maximizing ? myId : opponentId;
-        List<Move> moves = board.generateAllMoves(player);
 
         if (moves.isEmpty()) {
             double val = maximizing ? -999999 : 999999;
@@ -184,7 +189,6 @@ public class Minimax {
             return val;
         }
 
-        orderMoves(board, moves, player);
 
         if (maximizing) {
             double best = Double.NEGATIVE_INFINITY;
@@ -192,7 +196,7 @@ public class Minimax {
             for (Move m : moves) {
                 Board.MoveRecord rec = board.applyMove(m, player);
 
-                double value = minimax(board, depth - 1, alpha, beta, false);  //false not maximizing
+                double value = minimax(board, depth - 1, alpha, beta, false, moves);  //false not maximizing
 
                 board.undoMove(m, player, rec);
 
@@ -211,7 +215,7 @@ public class Minimax {
             for (Move m : moves) {
                 Board.MoveRecord rec = board.applyMove(m, player);
 
-                double value = minimax(board, depth - 1, alpha, beta, true);  //true maximizing
+                double value = minimax(board, depth - 1, alpha, beta, true, moves);  //true maximizing
 
                 board.undoMove(m, player, rec);
 
@@ -325,8 +329,8 @@ public class Minimax {
     		// 1. mobility improvement
             m.score = 1.0 * mobility;
 
-            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, 3);
-            m.score += potientalMovesScore;
+            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, 1);
+            m.score += potientalMovesScore*0.1;
             // 2. arrow impact
             double arrowScore = arrowImpact(board, m, playerId);
             m.score += arrowScore * 1.5;
@@ -354,7 +358,7 @@ public class Minimax {
     		// 1. mobility improvement
             m.score = 1.0 * mobility;
 
-            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, iterative-1);
+            double potientalMovesScore = nextMovesBestMoves(board, m, playerId, iterative);
             m.score += potientalMovesScore;
             // 2. arrow impact
             double arrowScore = arrowImpact(board, m, playerId);

@@ -24,4 +24,9 @@ public final class Move {
         this.arrowCol = arrowCol;
         this.score    = 0.0;
     }
+    public String toString(){
+        return String.format("moving from %d, %d to  %d, %d with a score of %.2f"
+, qFromRow,qFromCol,qToRow,qToCol,score);
+
+}
 }

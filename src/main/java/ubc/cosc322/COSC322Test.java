@@ -49,7 +49,7 @@ public class COSC322Test extends GamePlayer{
      */
     public static void main(String[] args) {
     	if (LOCAL_MODE) {
-            COSC322Test local = new COSC322Test("local", "local");
+            COSC322Test local = new COSC322Test("local2002", "local2002");
             local.runHumanVsAI();
             return;
         } else if (AIVSAI_MODE){
