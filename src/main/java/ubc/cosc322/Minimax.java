@@ -491,11 +491,7 @@ public class Minimax {
         }
 
         // Simulate arrow placement
-        int ar = m.arrowRow;
-        int ac = m.arrowCol;
-
-        int old = board.get(ar, ac);
-        board.set(ar, ac, 3);   // temporarily place arrow
+        Board.MoveRecord rec = board.applyMove(m, playerId);
 
         // Mobility AFTER placing the arrow
         int[] after = new int[oppQueens.size()];
@@ -505,7 +501,7 @@ public class Minimax {
         }
 
         // Undo temporary arrow
-        board.set(ar, ac, old);
+        board.undoMove(m, playerId, rec);
 
         // Compute impact
         double impact = 0;
