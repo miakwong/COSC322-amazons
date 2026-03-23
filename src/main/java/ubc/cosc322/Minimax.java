@@ -315,7 +315,8 @@ public class Minimax {
                 // We aint here this is their territory
                 totalScore += roomSize * 1.5;
             } else {
-                // Contested territory 
+                // Contested territory
+                //old way of doing It is here 
                 //totalScore += (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
                 //if(totalScore != 0){ // just to see if i need to adjust scoring
                 //    System.out.println(totalScore);
