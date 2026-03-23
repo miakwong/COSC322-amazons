@@ -1,6 +1,8 @@
 package ubc.cosc322;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Minimax {
 
@@ -83,7 +85,7 @@ public class Minimax {
             board.undoMove(m, myId, rec);
 
             if (value > bestValue) {
-                bestValue = value;ci
+                bestValue = value;
                 bestMove = m;
             }
 
@@ -260,7 +262,6 @@ public class Minimax {
     		// 1. Constrained queen heuristic
             int mobility = queenConstraint(board, m, playerId); 
     		// 1. mobility improvement
-            int mobility = queenConstraint(board, m, playerId); 
             m.score = 1.0 * mobility;
 
             // 2. arrow impact
