@@ -314,7 +314,9 @@ public class Minimax {
             } else {
                 // Contested territory 
                 totalScore = (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
-                System.out.println(totalScore);
+                if(totalScore != 0){
+                    System.out.println(totalScore);
+                }
             }
         }
         board.undoMove(m, myId, rec);
@@ -322,18 +324,18 @@ public class Minimax {
         return totalScore;
     }
     public List<Set<Integer>> findConnectedBlocks(Board board) {
-        List<Set<Integer>> rooms = new ArrayList<>();
-        boolean[] visited = new boolean[100];
+        List<Set<Integer>> territories = new ArrayList<>();
+        boolean[] visited = new boolean[100]; // 100
         for (int r = 0; r < 10; r++) {
             for (int c = 0; c < 10; c++) {
-                if (board.get(r, c) == 0 && !visited[r * 10 + c]) {
+                if (board.get(r, c) == 0 && !visited[r * 10 + c]) { // this will always be unique https://stackoverflow.com/questions/8935367/convert-a-2d-array-into-a-1d-array this way I can use sets
                     Set<Integer> room = new HashSet<>();
                     dfs(r, c, board, visited, room);
-                    rooms.add(room);
+                    territories.add(room);
                 }
             }
         }
-        return rooms;
+        return territories;
     }
     //https://www.geeksforgeeks.org/dsa/depth-first-search-or-dfs-for-a-graph/
     private void dfs(int r, int c, Board board, boolean[] visited, Set<Integer> room) {
