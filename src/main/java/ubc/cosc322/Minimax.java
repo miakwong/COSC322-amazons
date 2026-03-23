@@ -1,8 +1,11 @@
 package ubc.cosc322;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Minimax {
 
@@ -271,6 +274,10 @@ public class Minimax {
             // 3. Spacing penalts
             m.score += queenSpacingPenalty(board, m, playerId);
 
+            //Check for walling off potenital
+            double wallingOffScore = evaluateWallingMove(board, m, playerId);
+            m.score+=wallingOffScore;
+
             // (optional) small randomness
             m.score += Math.random() * 0.1;
     	} 
@@ -283,7 +290,89 @@ public class Minimax {
             moves.subList(40, moves.size()).clear();
         }
     }
-    
+    public double evaluateWallingMove(Board board, Move m, int playerID) {
+        Board.MoveRecord rec = board.applyMove(m, myId);
+        
+        // This just looks over the entire board saying what arrows are connected 
+        List<Set<Integer>> territories = findConnectedBlocks(board); 
+        
+        double totalScore = 0;
+        
+        // Go through all the territories see how they are looking
+        for (Set<Integer> territory : territories) {
+            int myQueens = countQueensInTerritory(board, territory, playerID);
+            int oppQueens = countQueensInTerritory(board, territory, opponentId);
+            int roomSize = territory.size(); // HOW MANY OF BLOCKS IN THIS TERRITORY
+
+            // This is saying What to do in some cases
+            if (myQueens > 0 && oppQueens == 0) {
+                // This is our territory no one else is here
+                totalScore = roomSize * 1.5; 
+            } else if (oppQueens > 0 && myQueens == 0) {
+                // We aint here this is their territory
+                totalScore = roomSize * 1.5;
+            } else {
+                // Contested territory 
+                totalScore = (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
+                System.out.println(totalScore);
+            }
+        }
+        board.undoMove(m, myId, rec);
+        
+        return totalScore;
+    }
+    public List<Set<Integer>> findConnectedBlocks(Board board) {
+        List<Set<Integer>> rooms = new ArrayList<>();
+        boolean[] visited = new boolean[100];
+        for (int r = 0; r < 10; r++) {
+            for (int c = 0; c < 10; c++) {
+                if (board.get(r, c) == 0 && !visited[r * 10 + c]) {
+                    Set<Integer> room = new HashSet<>();
+                    dfs(r, c, board, visited, room);
+                    rooms.add(room);
+                }
+            }
+        }
+        return rooms;
+    }
+    //https://www.geeksforgeeks.org/dsa/depth-first-search-or-dfs-for-a-graph/
+    private void dfs(int r, int c, Board board, boolean[] visited, Set<Integer> room) {
+        if (r < 0 || r >= 10 || c < 0 || c >= 10 || board.get(r, c) != 0 || visited[r * 10 + c]) { // I had some out of bounds issues lmao
+            return;// dont even know how they happened
+        }
+        visited[r * 10 + c] = true;
+        room.add(r * 10 + c);
+        // barowed form GOAs code (its very similar)
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (dr == 0 && dc == 0) continue;
+                dfs(r + dr, c + dc, board, visited, room); // recursive :)
+            }
+        }
+    }
+    private int countQueensInTerritory(Board board, Set<Integer> territory, int playerID) {
+        int count = 0;
+        List<int[]> queens = (playerID == 1) ? board.getWhiteQueens() : board.getBlackQueens();
+        // This is pretty simple it goes through all the terrtories spots looking for queens
+        for (int[] q : queens) { 
+            boolean canTouchTerritory = false;
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    if (dr == 0 && dc == 0) continue;
+                    int nr = q[0] + dr;
+                    int nc = q[1] + dc;
+                    //This checks if the queen is in the set.
+                    if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && territory.contains(nr * 10 + nc)) { // Again had some weird out of bounds thing dont know how its possible
+                        canTouchTerritory = true;
+                        break;
+                    }
+                }
+                if (canTouchTerritory) break;
+            }
+            if (canTouchTerritory) count++;
+        }
+        return count;
+    }
     // -------------------------
     //  QUEEN CONSTRAINT HEURISTIC
     // -------------------------
