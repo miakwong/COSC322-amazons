@@ -7,3 +7,7 @@
 3. Run this command
     -mvn exec:java "-Dexec.mainClass=ubc.cosc322.COSC322Test" "-Dexec.args=local local"
 4.YOUR DONE 
+
+###BRANCH INFO
+This branch is to improve off of baseline 2. Base line 2 can be found in the
+JamesAtempt2ToImproveBaseline1 branch

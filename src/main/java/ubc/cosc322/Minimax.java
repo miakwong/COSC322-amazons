@@ -307,16 +307,21 @@ public class Minimax {
             // This is saying What to do in some cases
             if (myQueens > 0 && oppQueens == 0) {
                 // This is our territory no one else is here
-                totalScore = roomSize * 1.5; 
+                totalScore += roomSize * 1.5; 
             } else if (oppQueens > 0 && myQueens == 0) {
                 // We aint here this is their territory
-                totalScore = roomSize * 1.5;
+                totalScore += roomSize * 1.5;
             } else {
                 // Contested territory 
-                totalScore = (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
+                totalScore += (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
                 //if(totalScore != 0){ // just to see if i need to adjust scoring
                 //    System.out.println(totalScore);
                 //}
+                //Future solutions for this queen distance BFS basically saying ok in this territory 
+                // for each square how many moves does it take me to get there and how many does it take my oppent
+                //if (myMovesToGetToSquare<OppentMovesToGetToSquare): this is my square
+                //elif(myMovesToGetToSquare>OppentMovesToGetToSquare): Its their square
+                //elif(myMovesToGetToSquare==OppentMovesToGetToSquare): Its in contest
             }
         }
         board.undoMove(m, myId, rec);
