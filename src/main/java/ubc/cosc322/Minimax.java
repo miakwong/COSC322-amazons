@@ -32,7 +32,7 @@ public class Minimax {
                 bestMove = move;
             }
         }
-
+        System.out.println("found the best Move"+bestMove.toString());
         return bestMove;
     }
 
@@ -41,10 +41,10 @@ public class Minimax {
         if(callAmount > 0){
             Move bestMove = findBestMoveInTheFuture(board, callAmount-1, m);
             if(bestMove == null){
-                System.out.println("returning null therefor 0 for next best move \n");
+                //System.out.println("returning null therefor 0 for next best move \n");
                 return 0;
             }
-            System.out.println(String.format("Score for this bestMove is :%.2f", bestMove.score));
+            //System.out.println(String.format("Score for this bestMove is :%.2f", bestMove.score));
             return bestMove.score;
         }
         return 0;
@@ -94,13 +94,34 @@ public class Minimax {
             int dist = Math.max(Math.abs(q[0] - newR), Math.abs(q[1] - newC));
 
             // penalties (too close)
-            if (dist <= 1) score -= 15;
-            else if (dist == 2) score -= 8;
-            else if (dist == 3) score -= 3;
+            if (dist <= 1) score -= 8;
+            else if (dist == 2) score -= 4;
+            else if (dist == 3) score -= 5;
 
 
             // reward (far apart)
-            else if (dist >= 5) score += 2;
+            else if (dist >= 5) score += 3;
+        }
+
+        return score;
+    }
+    private double queenWallPenlty(Board board, Move m, int playerId){
+        List<int[]> myQueens = (playerId == 1)
+                ? board.getWhiteQueens()
+                : board.getBlackQueens();
+
+        int newR = m.qToRow;
+        int newC = m.qToCol;
+
+        double score = 0;
+        for (int[] q : myQueens) {
+
+            // skip the queen we are moving
+            if (q[0] == m.qFromRow && q[1] == m.qFromCol) continue;
+
+            if(q[0] == 0|| q[0] == 9) score -= 4;
+            if(q[1] == 0 || q[1] == 9) score -=4;
+
         }
 
         return score;
@@ -131,7 +152,7 @@ public class Minimax {
 
             alpha = Math.max(alpha, bestValue);
         }
-
+        //System.out.println("found the best Move"+bestMove.toString());
         return bestMove;
     }
         public Move findBestMoveInTheFuture(Board board, int iterative, Move moveToCheck ) {
@@ -338,6 +359,9 @@ public class Minimax {
             // 3. Spacing penalts
             m.score += queenSpacingPenalty(board, m, playerId);
 
+            //wall penlty
+            double wallScore =  queenWallPenlty(board, m, playerId);
+            m.score += wallScore;
             // (optional) small randomness
             m.score += Math.random() * 0.1;
     	} 

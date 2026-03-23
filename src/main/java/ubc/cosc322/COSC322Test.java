@@ -49,7 +49,7 @@ public class COSC322Test extends GamePlayer{
      */
     public static void main(String[] args) {
     	if (LOCAL_MODE) {
-            COSC322Test local = new COSC322Test("local2002", "local2002");
+            COSC322Test local = new COSC322Test("local2003", "local2003");
             local.runHumanVsAI();
             return;
         } else if (AIVSAI_MODE){
@@ -413,7 +413,7 @@ public class COSC322Test extends GamePlayer{
                 myAI.setDepth(depth);
                 
                 // 5. Now generate your move and send it
-                myMove = myAI.findBestMove(board);
+                myMove = myAI.findBestMoveIterative(board,2000);
                 moveCount++;
 
                 // 6. Send my move to the server and update the GUI
