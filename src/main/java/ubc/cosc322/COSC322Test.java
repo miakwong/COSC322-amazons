@@ -26,7 +26,7 @@ import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 public class COSC322Test extends GamePlayer{
 
 	private static final boolean LOCAL_MODE = false;   // toggle local mode
-	private static final boolean AIVSAI_MODE = false;  // toggle AI vs AI mode
+	private static final boolean AIVSAI_MODE = true;  // toggle AI vs AI mode
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
