@@ -70,6 +70,7 @@ public class Minimax {
     }
 
     public Move findBestMove(Board board) {
+        Board copy = new Board(board);
 
         double alpha = Double.NEGATIVE_INFINITY;
         double beta  = Double.POSITIVE_INFINITY;
@@ -77,15 +78,15 @@ public class Minimax {
         double bestValue = Double.NEGATIVE_INFINITY;
         Move bestMove = null;
 
-        List<Move> moves = board.generateAllMoves(myId);
-        orderMoves(board, moves, myId);  // your existing heuristics
+        List<Move> moves = copy.generateAllMoves(myId);
+        orderMoves(copy, moves, myId);  // your existing heuristics
 
         for (Move m : moves) {
-            Board.MoveRecord rec = board.applyMove(m, myId);
+            Board.MoveRecord rec = copy.applyMove(m, myId);
 
-            double value = minimax(board, maxDepth - 1, alpha, beta, false);
+            double value = minimax(copy, maxDepth - 1, alpha, beta, false);
 
-            board.undoMove(m, myId, rec);
+            copy.undoMove(m, myId, rec);
 
             if (value > bestValue) {
                 bestValue = value;
