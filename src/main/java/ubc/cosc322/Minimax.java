@@ -262,21 +262,25 @@ public class Minimax {
      */
     private void orderMoves(Board board, List<Move> moves, int playerId) {
     	for (Move m : moves) {
+            //Copy of the board so we can simulate moves without affecting the original board state
+            Board copy = new Board(board);
     		// 1. Constrained queen heuristic
-            int mobility = queenConstraint(board, m, playerId); 
+            int mobility = queenConstraint(copy, m, playerId); 
     		// 1. mobility improvement
             m.score = 1.0 * mobility;
 
             // 2. arrow impact
-            double arrowScore = arrowImpact(board, m, playerId);
+            double arrowScore = arrowImpact(copy, m, playerId);
             m.score += arrowScore * 1.5;
 
             // 3. Spacing penalts
-            m.score += queenSpacingPenalty(board, m, playerId);
+            m.score += queenSpacingPenalty(copy, m, playerId);
 
             //Check for walling off potenital
-            double wallingOffScore = evaluateWallingMove(board, m, playerId);
-            m.score+=wallingOffScore;
+            double wallingOffScore = evaluateWallingMove(copy, m, playerId);
+            
+            if(board.mobility(myId)+board.mobility(opponentId)>40)m.score+=wallingOffScore;
+            else m.score+=(wallingOffScore*2);
 
             // (optional) small randomness
             m.score += Math.random() * 0.1;
@@ -294,18 +298,17 @@ public class Minimax {
         if (m.qToRow == m.arrowRow && m.qToCol == m.arrowCol) {
             return 0; // This is not a valid move, so we ignore it
         }
-        Board copy = new Board(board);
-        copy.applyMove(m, playerID);
+        Board.MoveRecord rec = board.applyMove(m, playerID);
         
         // This just looks over the entire board saying what arrows are connected 
-        List<Set<Integer>> territories = findConnectedBlocks(copy); 
+        List<Set<Integer>> territories = findConnectedBlocks(board); 
         
         double totalScore = 0;
         
         // Go through all the territories see how they are looking
         for (Set<Integer> territory : territories) {
-            int myQueens = countQueensInTerritory(copy, territory, playerID);
-            int oppQueens = countQueensInTerritory(copy, territory, opponentId);
+            int myQueens = countQueensInTerritory(board, territory, playerID);
+            int oppQueens = countQueensInTerritory(board, territory, opponentId);
             int roomSize = territory.size(); // HOW MANY OF BLOCKS IN THIS TERRITORY
 
             // This is saying What to do in some cases
@@ -323,9 +326,7 @@ public class Minimax {
                 //}
             }
         }
-        if (board.get(m.qFromRow, m.qFromCol) != playerID) {
-            System.out.println("BOARD CORRUPTION DETECTED");
-        }
+        board.undoMove(m, playerID, rec);
         return totalScore;
     }
     public List<Set<Integer>> findConnectedBlocks(Board board) {
