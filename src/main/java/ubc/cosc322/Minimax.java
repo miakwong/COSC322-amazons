@@ -291,36 +291,41 @@ public class Minimax {
         }
     }
     public double evaluateWallingMove(Board board, Move m, int playerID) {
-        Board.MoveRecord rec = board.applyMove(m, myId);
+        if (m.qToRow == m.arrowRow && m.qToCol == m.arrowCol) {
+            return 0; // This is not a valid move, so we ignore it
+        }
+        Board copy = new Board(board);
+        copy.applyMove(m, playerID);
         
         // This just looks over the entire board saying what arrows are connected 
-        List<Set<Integer>> territories = findConnectedBlocks(board); 
+        List<Set<Integer>> territories = findConnectedBlocks(copy); 
         
         double totalScore = 0;
         
         // Go through all the territories see how they are looking
         for (Set<Integer> territory : territories) {
-            int myQueens = countQueensInTerritory(board, territory, playerID);
-            int oppQueens = countQueensInTerritory(board, territory, opponentId);
+            int myQueens = countQueensInTerritory(copy, territory, playerID);
+            int oppQueens = countQueensInTerritory(copy, territory, opponentId);
             int roomSize = territory.size(); // HOW MANY OF BLOCKS IN THIS TERRITORY
 
             // This is saying What to do in some cases
             if (myQueens > 0 && oppQueens == 0) {
                 // This is our territory no one else is here
-                totalScore = roomSize * 1.5; 
+                totalScore += roomSize * 1.5; 
             } else if (oppQueens > 0 && myQueens == 0) {
                 // We aint here this is their territory
-                totalScore = roomSize * 1.5;
+                totalScore -= roomSize * 1.5;
             } else {
                 // Contested territory 
-                totalScore = (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
+                totalScore += (myQueens - oppQueens) * (roomSize / 10.0); // This is just saying hey what are the chances we win and is the room big enough to fight over
                 //if(totalScore != 0){ // just to see if i need to adjust scoring
                 //    System.out.println(totalScore);
                 //}
             }
         }
-        board.undoMove(m, myId, rec);
-        
+        if (board.get(m.qFromRow, m.qFromCol) != playerID) {
+            System.out.println("BOARD CORRUPTION DETECTED");
+        }
         return totalScore;
     }
     public List<Set<Integer>> findConnectedBlocks(Board board) {
@@ -357,7 +362,6 @@ public class Minimax {
         List<int[]> queens = (playerID == 1) ? board.getWhiteQueens() : board.getBlackQueens();
         // This is pretty simple it goes through all the terrtories spots looking for queens
         for (int[] q : queens) { 
-            boolean canTouchTerritory = false;
             for (int dr = -1; dr <= 1; dr++) {
                 for (int dc = -1; dc <= 1; dc++) {
                     if (dr == 0 && dc == 0) continue;
@@ -365,13 +369,11 @@ public class Minimax {
                     int nc = q[1] + dc;
                     //This checks if the queen is in the set.
                     if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && territory.contains(nr * 10 + nc)) { // Again had some weird out of bounds thing dont know how its possible
-                        canTouchTerritory = true;
+                        count++;
                         break;
                     }
                 }
-                if (canTouchTerritory) break;
             }
-            if (canTouchTerritory) count++;
         }
         return count;
     }
@@ -384,18 +386,13 @@ public class Minimax {
         int before = board.getLegalQueenMoves(m.qFromRow, m.qFromCol).size();
 
         // simulate queen move (no arrow)
-        int oldFrom = board.get(m.qFromRow, m.qFromCol);
-        int oldTo   = board.get(m.qToRow,   m.qToCol);
-
-        board.set(m.qFromRow, m.qFromCol, 0);
-        board.set(m.qToRow,   m.qToCol,   playerId);
+        Board.MoveRecord rec = board.applyMove(m, playerId);
 
         // mobility AFTER moving
         int after = board.getLegalQueenMoves(m.qToRow, m.qToCol).size();
 
         // restore
-        board.set(m.qFromRow, m.qFromCol, oldFrom);
-        board.set(m.qToRow,   m.qToCol,   oldTo);
+        board.undoMove(m, playerId, rec);
 
         // prefer moves that increase mobility
         return (after - before);
@@ -423,11 +420,9 @@ public class Minimax {
         }
 
         // Simulate arrow placement
-        int ar = m.arrowRow;
-        int ac = m.arrowCol;
+        Board.MoveRecord rec = board.applyMove(m, playerId);
 
-        int old = board.get(ar, ac);
-        board.set(ar, ac, 3);   // temporarily place arrow
+
 
         // Mobility AFTER placing the arrow
         int[] after = new int[oppQueens.size()];
@@ -437,7 +432,7 @@ public class Minimax {
         }
 
         // Undo temporary arrow
-        board.set(ar, ac, old);
+        board.undoMove(m, playerId, rec);
 
         // Compute impact
         double impact = 0;
