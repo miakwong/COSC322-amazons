@@ -42,8 +42,8 @@ public class Minimax {
     private double queenSpacingPenalty(Board board, Move m, int playerId) {
 
         List<int[]> myQueens = (playerId == 1)
-                ? board.getWhiteQueens()
-                : board.getBlackQueens();
+                ? board.getBlackQueens()
+                : board.getWhiteQueens();
 
         int newR = m.qToRow;
         int newC = m.qToCol;
@@ -70,6 +70,7 @@ public class Minimax {
     }
 
     public Move findBestMove(Board board) {
+        tt.clear();  // clear stale entries from previous turns
         Board copy = new Board(board);
 
         double alpha = Double.NEGATIVE_INFINITY;
@@ -190,8 +191,8 @@ public class Minimax {
     private int closestQueenDist(Board board, int r, int c, int playerId) {
 
         List<int[]> queens = (playerId == 1)
-                ? board.getWhiteQueens()
-                : board.getBlackQueens();
+                ? board.getBlackQueens()
+                : board.getWhiteQueens();
 
         int min = Integer.MAX_VALUE;
 
@@ -227,12 +228,12 @@ public class Minimax {
         int opponent = (myId == 1 ? 2 : 1);
 
         List<int[]> myQueens = (myId == 1)
-                ? board.getWhiteQueens()
-                : board.getBlackQueens();
+                ? board.getBlackQueens()
+                : board.getWhiteQueens();
 
         List<int[]> oppQueens = (opponent == 1)
-                ? board.getWhiteQueens()
-                : board.getBlackQueens();
+                ? board.getBlackQueens()
+                : board.getWhiteQueens();
 
         int score = 0;
 
@@ -361,7 +362,7 @@ public class Minimax {
     }
     private int countQueensInTerritory(Board board, Set<Integer> territory, int playerID) {
         int count = 0;
-        List<int[]> queens = (playerID == 1) ? board.getWhiteQueens() : board.getBlackQueens();
+        List<int[]> queens = (playerID == 1) ? board.getBlackQueens() : board.getWhiteQueens();
         // This is pretty simple it goes through all the terrtories spots looking for queens
         for (int[] q : queens) { 
             for (int dr = -1; dr <= 1; dr++) {
@@ -411,8 +412,8 @@ public class Minimax {
 
         // Use the board’s queen lists instead of scanning the whole grid
         List<int[]> oppQueens = (opponent == 1)
-                ? board.getWhiteQueens()
-                : board.getBlackQueens();
+                ? board.getBlackQueens()
+                : board.getWhiteQueens();
 
         // Mobility BEFORE placing the arrow
         int[] before = new int[oppQueens.size()];

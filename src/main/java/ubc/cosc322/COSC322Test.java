@@ -386,9 +386,20 @@ public class COSC322Test extends GamePlayer{
                 // 2. Build Move object using your new Move class
                 Move oppMove = new Move(qR, qC, nR, nC, aR, aC);
 
-                // --todo--
-                // do we need to verify opponents move
-                
+                // Verify opponent move is legal before applying
+                boolean oppMoveValid = false;
+                for (Move lm : board.generateAllMoves(opponentId)) {
+                    if (lm.qFromRow == oppMove.qFromRow && lm.qFromCol == oppMove.qFromCol &&
+                        lm.qToRow   == oppMove.qToRow   && lm.qToCol   == oppMove.qToCol   &&
+                        lm.arrowRow == oppMove.arrowRow && lm.arrowCol == oppMove.arrowCol) {
+                        oppMoveValid = true;
+                        break;
+                    }
+                }
+                if (!oppMoveValid) {
+                    System.out.println("WARNING: Opponent sent an illegal move — applying anyway.");
+                }
+
                 // 3. Apply opponent move to your board
                 board.applyMove(oppMove, opponentId);
 
@@ -452,18 +463,18 @@ public class COSC322Test extends GamePlayer{
             		playerId = 2;
             	}
             	
-            	// Initialize local board state before any moves 
-            	//board = new Board();
-            	//gamegui.setGameState(board.toRaw121());
-            	
-            	// Initialize AI with correct IDs (you can tune initial depth) 
+            	// Initialize local board state if GAME_STATE_BOARD hasn't arrived yet
+            	if (board == null)
+            		board = new Board();
+
+            	// Initialize AI with correct IDs (you can tune initial depth)
             	myAI = new Minimax(playerId, opponentId, 2);  // depth default is 2
-                
-                
+
+
             	// Black moves first
             	if (playerId == 1) {
             		System.out.println("Here I go first...");
-            		
+
             		// Make my first move
             		myMove = myAI.findBestMove(board);
             		moveCount++;
