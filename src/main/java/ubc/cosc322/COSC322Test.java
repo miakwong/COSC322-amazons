@@ -443,14 +443,7 @@ public class COSC322Test extends GamePlayer{
             	
             	// check which color we are playing
             	// we do this by checking our userName
-            	if (playerBlack.equals(this.userName)) {
-            		playerId = 1;  // black = 1
-            		opponentId = 2;  // white = 2
-            	}
-            	else {
-            		opponentId = 1;
-            		playerId = 2;
-            	}
+            	
             	
             	// Initialize local board state before any moves 
             	//board = new Board();
