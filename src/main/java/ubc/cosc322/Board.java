@@ -104,9 +104,9 @@ public class Board {
     private void placeQueen(int r, int c, int playerId) {
         grid[r][c] = playerId;
         if (playerId == 1) {
-            whiteQueens.add(new int[]{r, c});
-        } else if (playerId == 2) {
             blackQueens.add(new int[]{r, c});
+        } else if (playerId == 2) {
+            whiteQueens.add(new int[]{r, c});
         }
     }
 
@@ -118,8 +118,8 @@ public class Board {
         blackQueens.clear();
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                if (grid[r][c] == 1) whiteQueens.add(new int[]{r, c});
-                else if (grid[r][c] == 2) blackQueens.add(new int[]{r, c});
+                if (grid[r][c] == 1) blackQueens.add(new int[]{r, c});
+                else if (grid[r][c] == 2) whiteQueens.add(new int[]{r, c});
             }
         }
     }
@@ -188,7 +188,7 @@ public class Board {
         // find the queen from the queen list of the board
         // to do this we iterate through the list and see if the
         // row and column matches the queen that is being moved.
-        List<int[]> qList = (playerId == 1) ? whiteQueens : blackQueens;
+        List<int[]> qList = (playerId == 1) ? blackQueens : whiteQueens;
         int idx = -1;  
         for (int i = 0; i < qList.size(); i++) {
             int[] q = qList.get(i);
@@ -228,7 +228,7 @@ public class Board {
         grid[r3][c3] = rec.prevArrowVal;
 
         // restore the queen list value
-        List<int[]> qList = (playerId == 1) ? whiteQueens : blackQueens;
+        List<int[]> qList = (playerId == 1) ? blackQueens : whiteQueens;
         if (rec.queenIndex >= 0) {
             qList.set(rec.queenIndex, new int[]{rec.prevQueenRow, rec.prevQueenCol});
         }
@@ -237,7 +237,7 @@ public class Board {
     // generate all moves for a player using queen lists
     public List<Move> generateAllMoves(int playerId) {
         List<Move> moves = new ArrayList<>();
-        List<int[]> qList = (playerId == 1) ? whiteQueens : blackQueens;
+        List<int[]> qList = (playerId == 1) ? blackQueens : whiteQueens;
 
         // for each queen in queen list get all the legal queen moves
         // arrow is also a queen move.
@@ -289,7 +289,7 @@ public class Board {
     // Simple heuristic to count the total moves of all white or black queens
     public int mobility(int playerId) {
         int count = 0;
-        List<int[]> qList = (playerId == 1) ? whiteQueens : blackQueens;
+        List<int[]> qList = (playerId == 1) ? blackQueens : whiteQueens;
         
         // for each queen in the queen list, we count every possible move
         // the queen can make.
