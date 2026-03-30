@@ -40,15 +40,13 @@ public class Board {
         whiteQueens = new ArrayList<>();
         blackQueens = new ArrayList<>();
 
-        // white
-        // row, column, player ID
-        placeQueen(0, 3, 1);  
+        // black (playerId=1), starts at top
+        placeQueen(0, 3, 1);
         placeQueen(0, 6, 1);
         placeQueen(3, 0, 1);
         placeQueen(3, 9, 1);
 
-        // black
-        // row, column, player ID
+        // white (playerId=2), starts at bottom
         placeQueen(6, 0, 2);
         placeQueen(6, 9, 2);
         placeQueen(9, 3, 2);
@@ -128,10 +126,9 @@ public class Board {
 
     
 	 // The array of integers returned by amazonsGameMessages has a length of 121
-	 // 0 = empty
-	 // 1 = white queen
-	 // 2 = black queen
-	 // 3 = arrow
+	 // Server convention: 0=empty, 1=white queen, 2=black queen, 3=arrow
+	 // Internal convention: 0=empty, 1=black queen, 2=white queen, 3=arrow
+	 // (matches COSC322Test: playerId=1 for black, playerId=2 for white)
 	 // It is actually a 11 x 11 board
 	 // row 0 and column 11 are padded with 0s
 	 // This board class removes the padding and shrinks it down to a 10 x 10 board
@@ -139,6 +136,9 @@ public class Board {
         for (int r = 1; r <= 10; r++) {
             for (int c = 1; c <= 10; c++) {
                 int value = raw121.get(r * 11 + c);
+                // swap server's 1(white)↔2(black) to match internal convention
+                if (value == 1) value = 2;
+                else if (value == 2) value = 1;
                 grid[r - 1][c - 1] = value;
             }
         }
@@ -156,8 +156,12 @@ public class Board {
 	            if (r == 0 || r == 10 || c == 0 || c == 10) {
 	                raw121.add(0);
 	            } else {
-	                // Map playable rows 1–10 → internal rows 0–9
-	                raw121.add(grid[r - 1][c - 1]);
+	                // Map playable rows 1-10 → internal rows 0-9
+	                // swap back internal 1(black)↔2(white) to server convention
+	                int value = grid[r - 1][c - 1];
+	                if (value == 1) value = 2;
+	                else if (value == 2) value = 1;
+	                raw121.add(value);
 	            }
 	        }
 	    }
