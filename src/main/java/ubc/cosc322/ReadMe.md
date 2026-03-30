@@ -5,5 +5,5 @@
     -JDK Runtime tab -> the JDK selector -> choose new verison of java I use SE21
 2. Make sure you are on the university wifi (secure not the public one) or the ubc vpn through cisco
 3. Run this command
-    -mvn exec:java "-Dexec.mainClass=ubc.cosc322.COSC322Test" "-Dexec.args=local local"
+    -mvn exec:java "-Dexec.mainClass=ubc.cosc322.COSC322Test" "-Dexec.args=group4James local"
 4.YOUR DONE 

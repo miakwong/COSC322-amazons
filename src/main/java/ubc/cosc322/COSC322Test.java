@@ -49,7 +49,7 @@ public class COSC322Test extends GamePlayer{
      */
     public static void main(String[] args) {
     	if (LOCAL_MODE) {
-            COSC322Test local = new COSC322Test("local", "local");
+            COSC322Test local = new COSC322Test("group4James", "local2001");
             local.runHumanVsAI();
             return;
         } else if (AIVSAI_MODE){
@@ -475,7 +475,7 @@ public class COSC322Test extends GamePlayer{
             		// message GAME_STATE_BOARD, so do not need to update
             		// our copy of the board
             		// Update internal board 
-            		//board.applyMove(myMove, playerId);
+            		board.applyMove(myMove, playerId);
             		
             		//board.printBoard();
             		
